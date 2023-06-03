@@ -1,0 +1,156 @@
+1. Read in two numbers from the keyboard and print their sum (see the read, echo and let commands in the shell manual page).
+2. Write a shell script that given a person's uid, tells you how many times that person is logged on. (who, grep, wc)
+3. Write a shell script called lsdirs which lists just the directories in the current directory (test).
+4. Write a shell script called see taking a filename name as argument which uses ls if the file's a directory and more if the file's otherwise (test)
+5. Write a shell script that asks the user to type a word in, then tells the user how long that word is. (read, wc)
+6. In many versions of unix there is a -i argument for cp so that you will be prompted for confirmation if you are about to overwrite a file. 
+   Write a script called cpi which will prompt if necessary without using the -i argument. (test)
+7. Write a shell script that takes a uid as an argument and prints out that person's name, home directory, shell and group number. 
+   Print out the name of the group corresponding to the group number, and other groups that person may belong to. (groups, awk, cut. Also look at /etc/passwd and /etc/groups).
+8. Sort /etc/passwd using the uid (first field) as the key. (sort)
+9. Given a year, determine if it's a leap year or not
+10. Write a shell script that search a file for lines matching a regular expression pattern. Return the line number and contents of each matching line
+
+
+1. 
+******************************************************************************
+#!/bin/bash
+
+read -p "Please enter the two numbers to add" first_number second_number
+
+if [[ -z $first_number || -z $second_number ]]; then
+echo "Please enter two valid numbers"
+exit 1
+fi
+
+let sum=first_number + second_number
+echo "The sum of $first_number and $second_number is: $sum"
+******************************************************************************
+
+
+2.
+******************************************************************************
+#!/bin/bash
+
+read -p "Please enter user UID" uid
+
+
+count=$(who | grep $uid | wc -l)
+echo Person with UID $uid is logged on $count times."
+******************************************************************************
+
+
+3.
+****************************************************************************** 
+nano lsdirs.sh, chmod u+x lsdirs.sh
+#!/bin/bash
+
+echo $(ls -l | grep '^d')
+******************************************************************************
+
+
+4.
+******************************************************************************
+nano see.sh, chmod u+x see.sh
+#!/bin/bash
+
+file_name = $1;
+
+if [[ $file_name =~ "^d" ]]; then
+ echo $(ls $file_name)
+else
+ echo $(more $file_name)
+fi
+******************************************************************************
+
+
+5.
+******************************************************************************
+#!/bin/bash
+
+read -p "Please enter a word: " in
+
+echo $($in | wc -c)
+******************************************************************************
+
+
+6. 
+******************************************************************************
+#!/bin/bash
+
+source_file = "$1"
+destination_file = "$2"
+
+prompt_for_overwrite() {
+
+read -p "Destination file already exists, do you want to overwrite?" response
+
+case "$response" in
+    [yY][eE][sS])
+      return 0 # Overwrite
+      ;;
+    *)
+      return 1 # Do not overwrite
+      ;;
+  esac
+
+}
+
+if [[ -e $destination_file ]]; then
+  prompt_for_overwrite
+  overwrite=$?
+
+if [ "$overwrite" -eq 0 ]; then
+    cp "$source_file" "$destination_file"
+    echo "File overwritten."
+elif [ "$overwrite" -eq 1 ]
+    echo "File not overwritten."
+else
+  cp "$source_file" "$destination_file"
+  echo "File copied."
+fi
+******************************************************************************
+
+
+7.
+******************************************************************************
+#!/bin/bash
+
+read -p "Please enter UID: " uid
+
+echo $(awk -F':' -v uid_v="$uid" '$3 == uid_v { print $1,$6,$7,$4 }')
+******************************************************************************
+
+
+8. sort -n -t':' -k3 /etc/passwd
+
+
+9.
+****************************************************************************** 
+#!/bin/bash
+
+year = $1
+
+if [[ $(( $year % 4 )) -eq 0 ]]; then
+  echo "This is a leap year"
+fi
+******************************************************************************
+
+
+10.
+******************************************************************************
+#!/bin/bash
+
+file_name="$1"
+
+awk '/pattern/ { print NR-1,$0 }' "$file_name"
+Alternative = grep -nE "\w" filename
+******************************************************************************
+
+
+
+
+   
+
+ 
+
